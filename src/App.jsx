@@ -32,13 +32,26 @@ export default function App() {
     localStorage.setItem("ks_logs", JSON.stringify(logs));
   }, [logs]);
 
-  const handleKeyDown = (e) => {
+  const addLog = (key) => {
     if (!enabled) return;
-    const entry = {
-      key: normalizeKey(e.key),
-      ts: Date.now(),
-    };
+    const entry = { key: normalizeKey(key), ts: Date.now() };
     setLogs((prev) => [...prev, entry]);
+  };
+
+  // Handle special keys via keydown
+  const handleKeyDown = (e) => {
+    const specials = ["Enter","Backspace","Tab","Delete","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"];
+    if (specials.includes(e.key)) {
+      addLog(e.key);
+    }
+  };
+
+  // Handle normal text via input (avoids double logs)
+  const handleInput = (e) => {
+    const newVal = e.target.value;
+    const lastChar = newVal.slice(-1); 
+    if (lastChar) addLog(lastChar);
+    setText(newVal);
   };
 
   const clearLogs = () => setLogs([]);
@@ -100,7 +113,7 @@ export default function App() {
             className="area"
             placeholder="Start typing here..."
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onInput={handleInput}
             onKeyDown={handleKeyDown}
             rows={8}
           />
